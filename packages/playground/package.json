@@ -14,7 +14,7 @@
     "precommit": "lint-staged",
     "publish-to-gh-pages": "npm run build && gh-pages --dist build/",
     "publish-to-npm": "npm run build && npm publish",
-    "start": "webpack serve --open --config webpack.config.dev.js"
+    "start": "npx webpack serve --open --config webpack.config.dev.js"
   },
   "lint-staged": {
     "{playground,src,test}/**/*.js": [
@@ -49,7 +49,7 @@
     "@rjsf/fluent-ui": "^4.2.3",
     "@rjsf/material-ui": "^4.2.3",
     "@rjsf/semantic-ui": "^4.2.3",
-    "@rjsf/primereact": "https://gitpkg.now.sh/dchenk/react-jsonschema-form/packages/primereact?2ade66860050bf49cfa51680a35802ce6afb63b9",
+    "@rjsf/primereact": "^4.0.0",
     "ajv": "^6.7.0",
     "antd": "^4.3.5",
     "core-js": "^3.19.2",
