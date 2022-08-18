@@ -16,7 +16,6 @@ import {
   optionsList,
   retrieveSchema,
   toIdSchema,
-  getDefaultRegistry,
 } from "../../utils";
 import { nanoid } from "nanoid";
 
@@ -272,7 +271,7 @@ class ArrayField extends Component {
   }
 
   _getNewFormDataRow = () => {
-    const { schema, registry = getDefaultRegistry() } = this.props;
+    const { schema, registry } = this.props;
     const { rootSchema } = registry;
     let itemSchema = schema.items;
     if (isFixedItems(schema) && allowAdditionalItems(schema)) {
@@ -424,12 +423,7 @@ class ArrayField extends Component {
   };
 
   render() {
-    const {
-      schema,
-      uiSchema,
-      idSchema,
-      registry = getDefaultRegistry(),
-    } = this.props;
+    const { schema, uiSchema, idSchema, registry } = this.props;
     const { rootSchema } = registry;
     if (!schema.hasOwnProperty("items")) {
       const { fields } = registry;
@@ -469,12 +463,13 @@ class ArrayField extends Component {
       required,
       disabled,
       readonly,
+      hideError,
       autofocus,
-      registry = getDefaultRegistry(),
+      registry,
       onBlur,
       onFocus,
       idPrefix,
-      idSeparator,
+      idSeparator = "_",
       rawErrors,
     } = this.props;
     const title = schema.title === undefined ? name : schema.title;
@@ -488,7 +483,7 @@ class ArrayField extends Component {
         const { key, item } = keyedItem;
         const itemSchema = retrieveSchema(schema.items, rootSchema, item);
         const itemErrorSchema = errorSchema ? errorSchema[index] : undefined;
-        const itemIdPrefix = idSchema.$id + "_" + index;
+        const itemIdPrefix = idSchema.$id + idSeparator + index;
         const itemIdSchema = toIdSchema(
           itemSchema,
           itemIdPrefix,
@@ -519,6 +514,7 @@ class ArrayField extends Component {
       uiSchema,
       onAddClick: this.onAddClick,
       readonly,
+      hideError,
       required,
       schema,
       title,
@@ -544,13 +540,14 @@ class ArrayField extends Component {
       uiSchema,
       disabled,
       readonly,
+      hideError,
       required,
       placeholder,
       autofocus,
       onBlur,
       onFocus,
       formData: items,
-      registry = getDefaultRegistry(),
+      registry,
       rawErrors,
       name,
     } = this.props;
@@ -570,10 +567,12 @@ class ArrayField extends Component {
         onFocus={onFocus}
         options={options}
         schema={schema}
+        uiSchema={uiSchema}
         registry={registry}
         value={items}
         disabled={disabled}
         readonly={readonly}
+        hideError={hideError}
         required={required}
         label={title}
         placeholder={placeholder}
@@ -597,7 +596,7 @@ class ArrayField extends Component {
       autofocus,
       onBlur,
       onFocus,
-      registry = getDefaultRegistry(),
+      registry,
       rawErrors,
       name,
     } = this.props;
@@ -620,6 +619,7 @@ class ArrayField extends Component {
         onFocus={onFocus}
         options={options}
         schema={schema}
+        uiSchema={uiSchema}
         registry={registry}
         value={items}
         disabled={disabled}
@@ -645,7 +645,7 @@ class ArrayField extends Component {
       autofocus,
       onBlur,
       onFocus,
-      registry = getDefaultRegistry(),
+      registry,
       rawErrors,
     } = this.props;
     const title = schema.title || name;
@@ -662,10 +662,12 @@ class ArrayField extends Component {
         onBlur={onBlur}
         onFocus={onFocus}
         schema={schema}
+        uiSchema={uiSchema}
         title={title}
         value={items}
         disabled={disabled}
         readonly={readonly}
+        registry={registry}
         formContext={formContext}
         autofocus={autofocus}
         rawErrors={rawErrors}
@@ -680,14 +682,14 @@ class ArrayField extends Component {
       formData,
       errorSchema,
       idPrefix,
-      idSeparator,
+      idSeparator = "_",
       idSchema,
       name,
       required,
       disabled,
       readonly,
       autofocus,
-      registry = getDefaultRegistry(),
+      registry,
       onBlur,
       onFocus,
       rawErrors,
@@ -722,7 +724,7 @@ class ArrayField extends Component {
         const itemSchema = additional
           ? retrieveSchema(schema.additionalItems, rootSchema, item)
           : itemSchemas[index];
-        const itemIdPrefix = idSchema.$id + "_" + index;
+        const itemIdPrefix = idSchema.$id + idSeparator + index;
         const itemIdSchema = toIdSchema(
           itemSchema,
           itemIdPrefix,
@@ -757,6 +759,7 @@ class ArrayField extends Component {
       onAddClick: this.onAddClick,
       readonly,
       required,
+      registry,
       schema,
       uiSchema,
       title,
@@ -790,20 +793,11 @@ class ArrayField extends Component {
       onFocus,
       rawErrors,
     } = props;
-    const {
-      disabled,
-      readonly,
-      uiSchema,
-      registry = getDefaultRegistry(),
-    } = this.props;
+    const { disabled, readonly, uiSchema, registry } = this.props;
     const {
       fields: { SchemaField },
     } = registry;
-    const { orderable, removable } = {
-      orderable: true,
-      removable: true,
-      ...uiSchema["ui:options"],
-    };
+    const { orderable = true, removable = true } = getUiOptions(uiSchema);
     const has = {
       moveUp: orderable && canMoveUp,
       moveDown: orderable && canMoveDown,
@@ -819,6 +813,8 @@ class ArrayField extends Component {
           uiSchema={itemUiSchema}
           formData={itemData}
           errorSchema={itemErrorSchema}
+          idPrefix={this.props.idPrefix}
+          idSeparator={this.props.idSeparator}
           idSchema={itemIdSchema}
           required={this.isItemRequired(itemSchema)}
           onChange={this.onChangeForIndex(index)}
@@ -827,6 +823,7 @@ class ArrayField extends Component {
           registry={this.props.registry}
           disabled={this.props.disabled}
           readonly={this.props.readonly}
+          hideError={this.props.hideError}
           autofocus={autofocus}
           rawErrors={rawErrors}
         />
